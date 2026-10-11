@@ -1,0 +1,137 @@
+{
+  "project_name": "VoteSecure",
+  "project_subtitle": "Secure Online College Election Management System",
+  "author_credit": "Built and developed by Hriata_khuptong",
+  "design_direction": {
+    "theme": "Institutional Security Dark Navy & Cyan (NavyStack Architecture)",
+    "mood": "Authoritative, Trustworthy, Cryptographically Auditable, High-Precision SaaS",
+    "primary_background": "#0B132B",
+    "secondary_background": "#1C2541",
+    "card_background": "#111A33",
+    "border_color": "#1E2D54",
+    "accent_cyan": "#00E5FF",
+    "accent_blue": "#3A86FF",
+    "success_emerald": "#10B981",
+    "warning_amber": "#F59E0B",
+    "danger_rose": "#F43F5E",
+    "text_primary": "#F8FAFC",
+    "text_secondary": "#94A3B8",
+    "text_muted": "#64748B"
+  },
+  "typography": {
+    "font_headings": "Outfit, sans-serif",
+    "font_body": "Inter, sans-serif",
+    "font_code_mono": "JetBrains Mono, monospace",
+    "rules": {
+      "h1": "text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-50",
+      "h2": "text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-slate-100",
+      "h3": "text-xl sm:text-2xl font-semibold text-slate-200",
+      "h4": "text-lg font-medium text-slate-300",
+      "body": "text-sm sm:text-base leading-relaxed text-slate-300",
+      "code_hash": "font-mono text-xs sm:text-sm tracking-wider text-cyan-400 bg-slate-900/80 px-2 py-1 rounded border border-cyan-500/20"
+    }
+  },
+  "footer_requirements": {
+    "mandatory_credit": "Built and developed by Hriata_khuptong",
+    "style": "py-8 border-t border-slate-800 bg-slate-950 text-center text-xs text-slate-400 font-mono tracking-wide"
+  },
+  "layout_and_navigation": {
+    "header": {
+      "style": "sticky top-0 z-50 backdrop-blur-xl bg-[#0B132B]/80 border-b border-slate-800/80 px-4 lg:px-8 py-3.5 flex items-center justify-between",
+      "elements": [
+        "VoteSecure Shield & Lock Logo (Cyan/Blue gradient text)",
+        "Role Switcher / Navigation Tabs (Public, Student, Admin, Auditor, System Operator)",
+        "Session State (Logged in user badge, department, verification tag, logout button)"
+      ]
+    },
+    "sidebar": {
+      "style": "w-64 bg-[#0F172A] border-r border-slate-800 h-[calc(100vh-65px)] sticky top-[65px] p-4 space-y-2 hidden md:block",
+      "active_item": "bg-cyan-500/10 text-cyan-400 border-r-2 border-cyan-400 font-medium",
+      "inactive_item": "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
+    }
+  },
+  "roles_and_dashboards": {
+    "public_homepage": {
+      "sections": [
+        "Hero Section with cryptographic security assurance badge, live election ticker, quick access CTAs (Vote Now / Register)",
+        "Institutional Trust Pillars (Zero-Knowledge Hash Receipts, Immutable Audit Trail, Multi-Role Governance)",
+        "Election Rules & Verification Flow guide",
+        "Public Election Schedule & Official Results Portal"
+      ]
+    },
+    "student_portal": {
+      "registration": "Fields: Full Name, Registration Number (e.g., BCA20240412), Department, Semester (1-8), Official College Email, Password. Clear validation message on pending admin verification.",
+      "login": "Email & Password. Password recovery flow with Admin-Issued Reset Token modal/page.",
+      "dashboard": {
+        "status_banner": "Student Identity Verification Status (Pending / Approved / Rejected) with department info",
+        "eligible_elections": "Active elections for student's department & semester",
+        "voting_flow": {
+          "step_1": "Candidate selection grid with candidate bios, manifestos, photo avatars",
+          "step_2": "Review-Before-Submit modal modal/view with selected candidate details & warning that votes cannot be altered",
+          "step_3": "Confirmation modal with cryptographic SHA-256 voting hash receipt generator & downloadable verification proof",
+          "step_4": "Voted state displaying locked receipt token and timestamp"
+        },
+        "participation_history": "List of past elections voted in with verification hash tokens"
+      }
+    },
+    "admin_dashboard": {
+      "tabs": [
+        "Verification Queue (Approve/Reject student accounts with search and department filters)",
+        "CSV Student Registry Import (File upload, column mapper, data preview table, dry-run validation report)",
+        "Elections Management (Lifecycle: Draft -> Scheduled -> Open -> Closed -> Finalized. Action controls per stage)",
+        "Candidates Approval & Eligibility Manager (Add candidates, assign to elections/positions, set criteria)",
+        "Turnout Analytics (Recharts visualizations for hourly voting curve, department turnout %, semester breakdown)",
+        "Reconciliation & Two-Person Approvals (Double-signoff requirement before finalizing election results)",
+        "Official Results Publication Toggle"
+      ]
+    },
+    "auditor_dashboard": {
+      "features": [
+        "Audit Event Viewer (Filterable real-time event log with event type, actor ID, IP hash, timestamp, payload)",
+        "Hash-Chain Integrity Verification Tool (Recompute block hashes, detect tampering, visual status indicator)",
+        "Reconciliation Audit Reports (Discrepancy detection, turnout vs ballot count verification, export PDF/JSON)",
+        "Read-Only System Configuration Inspector"
+      ]
+    },
+    "system_operator_dashboard": {
+      "features": [
+        "System Health & Operational Status (CPU/Memory simulated telemetry, API response times)",
+        "Database Connectivity & Pool Statistics",
+        "Sanitized Exception & Error Logs (No sensitive data exposed)",
+        "Active System Alerts & Incident Management"
+      ]
+    }
+  },
+  "empty_states": {
+    "rule": "Must show clean, professional empty states when data is empty. NO fake placeholder rows.",
+    "style": "p-12 text-center rounded-xl border border-dashed border-slate-800 bg-slate-900/40 text-slate-400 space-y-3",
+    "components": "Lucide icon (e.g. Inbox, ShieldAlert, FileText), clean headline, brief explanatory paragraph, action button if applicable."
+  },
+  "data_testing_convention": {
+    "rule": "All interactive and key informational elements MUST include a data-testid attribute in kebab-case.",
+    "examples": {
+      "login_submit": "data-testid=\"login-submit-btn\"",
+      "vote_button": "data-testid=\"vote-submit-btn\"",
+      "candidate_card": "data-testid=\"candidate-card-bca-01\"",
+      "admin_verify_approve": "data-testid=\"admin-approve-student-btn\"",
+      "hash_verify_btn": "data-testid=\"hash-integrity-verify-btn\"",
+      "csv_upload_input": "data-testid=\"csv-registry-file-input\""
+    }
+  },
+  "image_urls": {
+    "campus_hero": "https://images.unsplash.com/photo-1562774053-701939374585?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1MDZ8MHwxfHNlYXJjaHwyfHx1bml2ZXJzaXR5JTIwY2FtcHVzJTIwYnVpbGRpbmclMjBhcmNoaXRlY3R1cmV8ZW58MHx8fHwxNzkxNTc1NDA0fDA&ixlib=rb-4.1.0&q=85",
+    "security_tech_bg": "https://images.unsplash.com/photo-1614064641938-3bbee52942c7?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxNzV8MHwxfHNlYXJjaHwxfHxzZWN1cmUlMjB2b3RpbmclMjBjeWJlciUyMHNlY3VyaXR5JTIwdGVjaCUyMGJhY2tncm91bmR8ZW58MHx8fHwxNzkxNTc1NDA0fDA&ixlib=rb-4.1.0&q=85",
+    "candidate_female_1": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY6NzB8MHwxfHNlYXJjaHwzfHxzdHVkZW50JTIwcG9ydHJhaXQlMjBwcm9mZXNzaW9uYWwlMjBoZWFkc2hvdHxlbnwwfHx8fDE3OTE1NzU0MDh8MA&ixlib=rb-4.1.0&q=85",
+    "candidate_male_1": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY6NzB8MHwxfHNlYXJjaHwxfHxzdHVkZW50JTIwcG9ydHJhaXQlMjBwcm9mZXNzaW9uYWwlMjBoZWFkc2hvdHxlbnwwfHx8fDE3OTE1NzU0MDh8MA&ixlib=rb-4.1.0&q=85",
+    "candidate_female_2": "https://images.unsplash.com/photo-1543949806-2c9935e6aa78?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY6NzB8MHwxfHNlYXJjaHw0fHxzdHVkZW50JTIwcG9ydHJhaXQlMjBwcm9mZXNzaW9uYWwlMjBoZWFkc2hvdHxlbnwwfHx8fDE3OTE1NzU0MDh8MA&ixlib=rb-4.1.0&q=85"
+  },
+  "instructions_to_main_agent": [
+    "Build a complete multi-role college election management web app in React JS + Tailwind CSS + Shadcn components.",
+    "Ensure dark navy (#0B132B) background foundation with cyan (#00E5FF) and electric blue (#3A86FF) accents.",
+    "Implement clear role switching in header for testing all flows: Public Homepage, Student, Admin, Auditor, and System Operator.",
+    "Provide real state management (in-memory/localStorage or mock service layer) allowing full election workflow execution: Student Registration -> Admin CSV import / account approval -> Election Creation (Draft to Open) -> Student Vote Submit -> Review Modal -> Receipt Generation -> Turnout Charting -> Reconciliation -> Auditor Hash Verification -> Finalization.",
+    "Display real empty states when queues or election lists are empty.",
+    "Strictly follow footer credit requirement: 'Built and developed by Hriata_khuptong'.",
+    "Include data-testid on all interactive buttons, inputs, links, and key indicators."
+  ]
+}

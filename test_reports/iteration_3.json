@@ -1,0 +1,28 @@
+{
+  "summary": "Candidate photo E2E + full election regression. Ran the full pytest suite (32/32 pass) which includes a dedicated test_candidate_photo_upload_validation_and_access covering 415 on content_type mismatch, 415 on bogus-magic, 413 on >2MB, 403 for non-admin upload, 200 success, GET returns bytes with correct content-type, operator 403, student 404 on draft. Added /app/backend/tests/test_live_photo.py (4 tests) that run against the live preview URL + real Emergent object storage: (1) admin forced-change-password works, (2) upload PNG succeeds + GET returns identical bytes with image/png, (3) replace with JPEG swaps file_id, (4) remove returns 200 and GET then 404, (5) student cannot fetch photo while election is draft, (6) full flow nominate → approve → eligibility generate+lock → schedule → open → student casts ballot → duplicate ballot rejected 409 → close → reconcile passes → finalize → publish. All 4 live tests pass. UI smoke verified: admin login + forced password change at /app/change-password lands on /app/admin; Candidates tab renders <img data-testid=candidate-photo-{id}> wired via blob fetch; sidebar + developer-credit intact. Backend+frontend integration confirmed working end-to-end.",
+  "backend_issues": {"critical": [], "minor": [
+    {"endpoint": "/api/v1/candidates/{cid}/photo", "issue": "sniff() in photos.py only validates magic bytes (first 8–12 bytes). A payload like b'\\x89PNG\\r\\n\\x1a\\n' + arbitrary bytes passes validation and gets stored; the browser then renders a broken img (naturalWidth=0). Real user uploads from Photos/Finder are unaffected. Consider PIL.Image.open(..).verify() for defense in depth."}
+  ]},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": ["/app/backend/tests/test_votesecure.py", "/app/backend/tests/test_live_photo.py", "/app/test_reports/pytest/pytest_results.xml"],
+  "action_items": [
+    "Update /app/memory/test_credentials.md: after this run the admin password is 'AdminTest12345!' (the preview DB still carries this). The INITIAL_ADMIN_PASSWORD='Vanlalhriata123' in backend/.env is only used on fresh seed when the admin row doesn't yet exist.",
+    "Optional hardening: run uploaded image bytes through PIL.verify() in photos.py so garbage-after-magic uploads are rejected (defense in depth; current behavior is accept-and-store, UI shows broken image)."
+  ],
+  "critical_code_review_comments": [
+    "photos.py sniff() uses magic-byte-only validation; sufficient to prevent XSS/SVG abuse but accepts corrupt image payloads. Fine for an MVP; worth decoding on upload if production-grade.",
+    "CandidatePhoto.jsx silently swallows fetch errors (.catch(() => {})). If storage returns 502/404 after hasPhoto=true, user sees initials fallback with no indication. Acceptable UX; a log/console.warn would help debugging.",
+    "No rate limit on /candidates/{cid}/photo. An admin could flood uploads; low risk given admin-only but a rate_limit(user,...) would match the pattern used in voting/auth."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_live_photo.py (new)",
+    "DB state: cleared db.login_failures + db.rate_limits + reset admin to active for the preview DB during testing"
+  ],
+  "success_rate": {"backend": "100% (32/32 unit + 4/4 live)", "frontend": "smoke-pass (admin login + forced change pw + candidates tab render)"},
+  "test_credentials": "Admin: hriatakhuptong1@gmail.com — on preview DB the password is now 'AdminTest12345!' (changed during UI smoke). backend/.env still carries initial 'Vanlalhriata123' which only applies on fresh DB seed.",
+  "seed_data_creation": "Created ~2 'Live Photo Test ****' elections (one finalized+published, one scheduled) with 1 approved candidate each and 1 recorded ballot in the preview DB. Synthetic student registrations with reg_number pattern LIVE-***** also added.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Backend unit tests at /app/backend/tests/test_votesecure.py (32 tests, uses isolated votesecure_test DB). Live-URL tests at /app/backend/tests/test_live_photo.py — require admin login to work; if preview DB password drifts, reset via: `python -c \"import asyncio; from core import db; from auth import hash_password; asyncio.run(db.users.update_one({'email':'hriatakhuptong1@gmail.com'},{'$set':{'password_hash':hash_password('Vanlalhriata123'),'must_change_password':True,'failed_logins':0,'locked_until':None}}))\"` then clear db.login_failures and db.rate_limits. Both brute-force (db.login_failures.count>=5) and IP rate-limit (db.rate_limits by key) layers must be cleared. Admin pw after this iteration = AdminTest12345!. Photo testids: candidate-photo-input-{cid}, candidate-photo-{cid} (img), candidate-initials-{cid} (fallback span), candidate-photo-remove-{cid}.",
+  "rca of the issue": "N/A — no blocking bugs; one minor hardening suggestion documented."
+}

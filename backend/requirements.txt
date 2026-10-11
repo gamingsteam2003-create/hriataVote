@@ -17,3 +17,4 @@ boto3
 requests
 httpx
 cryptography
+argon2-cffi

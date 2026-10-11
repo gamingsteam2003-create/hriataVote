@@ -55,8 +55,8 @@ async def create_session(response: Response, user_id: str, request: Request):
         "last_seen": t, "expires_at": t + timedelta(hours=SESSION_ABSOLUTE_HOURS), "ip_hash": ip_hash(client_ip(request)),
     })
     age = SESSION_ABSOLUTE_HOURS * 3600
-    response.set_cookie(SESSION_COOKIE, token, httponly=True, secure=COOKIE_SECURE, samesite="lax", max_age=age, path="/")
-    response.set_cookie(CSRF_COOKIE, csrf, httponly=False, secure=COOKIE_SECURE, samesite="lax", max_age=age, path="/")
+    response.set_cookie(SESSION_COOKIE, token, httponly=True, secure=COOKIE_SECURE, samesite="none", max_age=age, path="/")
+    response.set_cookie(CSRF_COOKIE, csrf, httponly=False, secure=COOKIE_SECURE, samesite="none", max_age=age, path="/")
 
 
 def clear_cookies(response: Response):

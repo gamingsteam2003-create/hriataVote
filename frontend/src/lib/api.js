@@ -19,10 +19,12 @@ const readCookie = (name) => {
 
   if (!cookie) return null;
 
+  const value = cookie.slice(prefix.length);
+
   try {
-    return decodeURIComponent(cookie.slice(prefix.length));
+    return decodeURIComponent(value);
   } catch {
-    return cookie.slice(prefix.length);
+    return value;
   }
 };
 
@@ -32,14 +34,19 @@ api.interceptors.request.use((config) => {
   if (!["get", "head", "options"].includes(method)) {
     const csrfToken = readCookie("vs_csrf");
 
-    if (csrfToken) {
-      config.headers = config.headers || {};
+    // Diagnostic only: never print the actual token.
+    console.log("CSRF cookie available:", Boolean(csrfToken));
 
+    config.headers = config.headers || {};
+
+    if (csrfToken) {
       if (typeof config.headers.set === "function") {
         config.headers.set("X-CSRF-Token", csrfToken);
       } else {
         config.headers["X-CSRF-Token"] = csrfToken;
       }
+    } else {
+      console.warn("CSRF cookie is not readable by the frontend.");
     }
   }
 

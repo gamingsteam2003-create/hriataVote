@@ -19,3 +19,4 @@ httpx
 cryptography
 argon2-cffi
 reportlab
+cloudinary

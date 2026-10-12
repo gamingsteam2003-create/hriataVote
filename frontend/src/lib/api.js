@@ -13,26 +13,32 @@ export function setCsrfToken(token) {
   csrfToken = token || null;
 }
 
+// These endpoints must work without an existing authenticated session.
 const csrfExemptPaths = [
   "/auth/login",
   "/auth/mfa/login",
   "/auth/reset-password",
+  "/students/register",
 ];
 
 api.interceptors.request.use(async (config) => {
   const method = (config.method || "get").toLowerCase();
+
   const path = (config.url || "")
     .split("?")[0]
     .replace(/\/+$/, "");
 
+  // Safe HTTP methods do not require a CSRF header.
   if (["get", "head", "options"].includes(method)) {
     return config;
   }
 
+  // Public endpoints must not request a session-bound CSRF token.
   if (csrfExemptPaths.includes(path)) {
     return config;
   }
 
+  // Fetch a CSRF token when a protected write request needs one.
   if (!csrfToken) {
     const response = await axios.get(
       `${api.defaults.baseURL}/auth/csrf`,

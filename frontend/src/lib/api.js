@@ -1,56 +1,47 @@
 import axios from "axios";
-
 export const api = axios.create({
   baseURL: `${process.env.REACT_APP_BACKEND_URL}/api/v1`,
   withCredentials: true,
   timeout: 20000,
 });
-
 const readCookie = (name) => {
+  const prefix = `${name}=`;
   const cookie = document.cookie
     .split("; ")
-    .find((item) => item.startsWith(`${name}=`));
-
-  return cookie ? cookie.slice(name.length + 1) : null;
+    .find((item) => item.startsWith(prefix));
+  return cookie ? decodeURIComponent(cookie.slice(prefix.length)) : null;
 };
-
-api.interceptors.request.use((cfg) => {
-  cfg.headers = cfg.headers || {};
-
-  const method = (cfg.method || "get").toLowerCase();
-  const token = readCookie("vs_csrf");
-
-  if (token && !["get", "head", "options"].includes(method)) {
-    try {
-      cfg.headers["X-CSRF-Token"] = decodeURIComponent(token);
-    } catch {
-      cfg.headers["X-CSRF-Token"] = token;
+api.interceptors.request.use((config) => {
+  const method = (config.method || "get").toLowerCase();
+  if (!["get", "head", "options"].includes(method)) {
+    const csrfToken = readCookie("vs_csrf");
+    if (csrfToken) {
+      config.headers = config.headers || {};
+      config.headers["X-CSRF-Token"] = csrfToken;
     }
   }
-
-  return cfg;
+  return config;
 });
-
-export function errMsg(e) {
-  const er = e?.response?.data?.error;
-
-  if (!er) {
-    return e?.response
+export function errMsg(error) {
+  const err = error?.response?.data?.error;
+  if (!err) {
+    return error?.response
       ? "Request failed."
       : "Network error: the server could not be reached.";
   }
-
-  if (Array.isArray(er.details) && er.details.length) {
-    return `${er.message} ${er.details
-      .map((d) => (d.field ? `${d.field}: ${d.msg}` : d.msg))
+  if (Array.isArray(err.details) && err.details.length) {
+    return `${err.message} ${err.details
+      .map((detail) =>
+        detail.field
+          ? `${detail.field}: ${detail.msg}`
+          : detail.msg
+      )
       .join(" ")}`;
   }
-
-  return er.message;
+  return err.message || "An unexpected error occurred.";
 }
-
-export const errCode = (e) => e?.response?.data?.error?.code;
-
+export const errCode = (error) =>
+  error?.response?.data?.error?.code;
 export const fmt = (iso) =>
   iso
     ? new Date(iso).toLocaleString(undefined, {
@@ -58,14 +49,13 @@ export const fmt = (iso) =>
         timeStyle: "short",
       })
     : "—";
-
 export const toLocalInput = (iso) => {
   if (!iso) return "";
-
-  const d = new Date(iso);
-  const pad = (n) => String(n).padStart(2, "0");
-
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(
-    d.getDate()
-  )}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const date = new Date(iso);
+  const pad = (number) => String(number).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(
+    date.getMonth() + 1
+  )}-${pad(date.getDate())}T${pad(
+    date.getHours()
+  )}:${pad(date.getMinutes())}`;
 };

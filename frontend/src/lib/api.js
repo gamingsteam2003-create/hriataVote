@@ -9,44 +9,37 @@ export const api = axios.create({
   },
 });
 
-const readCookie = (name) => {
-  const prefix = `${name}=`;
-
-  const cookie = document.cookie
-    .split(";")
-    .map((item) => item.trim())
-    .find((item) => item.startsWith(prefix));
-
-  if (!cookie) return null;
-
-  const value = cookie.slice(prefix.length);
-
-  try {
-    return decodeURIComponent(value);
-  } catch {
-    return value;
-  }
-};
-
-api.interceptors.request.use((config) => {
+api.interceptors.request.use(async (config) => {
   const method = (config.method || "get").toLowerCase();
 
   if (!["get", "head", "options"].includes(method)) {
-    const csrfToken = readCookie("vs_csrf");
+    // Use plain axios so fetching the CSRF token does not
+    // trigger this interceptor recursively.
+    const response = await axios.get(
+      `${api.defaults.baseURL}/auth/csrf`,
+      {
+        withCredentials: true,
+        timeout: 20000,
+      }
+    );
 
-    // Diagnostic only: never print the actual token.
-    console.log("CSRF cookie available:", Boolean(csrfToken));
+    const csrfToken = response.data?.csrf_token;
+
+    if (!csrfToken) {
+      throw new Error(
+        "Unable to obtain the CSRF security token."
+      );
+    }
 
     config.headers = config.headers || {};
 
-    if (csrfToken) {
-      if (typeof config.headers.set === "function") {
-        config.headers.set("X-CSRF-Token", csrfToken);
-      } else {
-        config.headers["X-CSRF-Token"] = csrfToken;
-      }
+    if (typeof config.headers.set === "function") {
+      config.headers.set(
+        "X-CSRF-Token",
+        csrfToken
+      );
     } else {
-      console.warn("CSRF cookie is not readable by the frontend.");
+      config.headers["X-CSRF-Token"] = csrfToken;
     }
   }
 
@@ -58,13 +51,22 @@ export function errMsg(error) {
 
   if (!err) {
     if (error?.response) {
-      return error.response.data?.detail || "Request failed.";
+      return (
+        error.response.data?.detail ||
+        "Request failed."
+      );
     }
 
-    return "Network error: the server could not be reached.";
+    return (
+      error?.message ||
+      "Network error: the server could not be reached."
+    );
   }
 
-  if (Array.isArray(err.details) && err.details.length) {
+  if (
+    Array.isArray(err.details) &&
+    err.details.length
+  ) {
     return `${err.message} ${err.details
       .map((detail) =>
         detail.field
@@ -74,7 +76,10 @@ export function errMsg(error) {
       .join(" ")}`;
   }
 
-  return err.message || "An unexpected error occurred.";
+  return (
+    err.message ||
+    "An unexpected error occurred."
+  );
 }
 
 export const errCode = (error) =>
@@ -92,7 +97,9 @@ export const toLocalInput = (iso) => {
   if (!iso) return "";
 
   const date = new Date(iso);
-  const pad = (number) => String(number).padStart(2, "0");
+
+  const pad = (number) =>
+    String(number).padStart(2, "0");
 
   return `${date.getFullYear()}-${pad(
     date.getMonth() + 1

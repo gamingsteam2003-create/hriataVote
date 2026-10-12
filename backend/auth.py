@@ -48,31 +48,43 @@ async def create_session(response: Response, user_id: str, request: Request):
     old = request.cookies.get(SESSION_COOKIE)
     if old:
         await db.sessions.delete_one({"token_hash": sha256(old)})
-    token, csrf = secrets.token_urlsafe(32), secrets.token_urlsafe(24)
+
+    token = secrets.token_urlsafe(32)
+    csrf = secrets.token_urlsafe(24)
     t = now()
+
     await db.sessions.insert_one({
-        "_id": new_id(), "token_hash": sha256(token), "user_id": user_id, "csrf": csrf, "created_at": t,
-        "last_seen": t, "expires_at": t + timedelta(hours=SESSION_ABSOLUTE_HOURS), "ip_hash": ip_hash(client_ip(request)),
+        "_id": new_id(),
+        "token_hash": sha256(token),
+        "user_id": user_id,
+        "csrf": csrf,
+        "created_at": t,
+        "last_seen": t,
+        "expires_at": t + timedelta(hours=SESSION_ABSOLUTE_HOURS),
+        "ip_hash": ip_hash(client_ip(request)),
     })
+
     age = SESSION_ABSOLUTE_HOURS * 3600
-  response.set_cookie(
-    SESSION_COOKIE,
-    token,
-    httponly=True,
-    secure=True,
-    samesite="none",
-    max_age=age,
-    path="/",
-)
-response.set_cookie(
-    CSRF_COOKIE,
-    csrf,
-    httponly=False,
-    secure=True,
-    samesite="none",
-    max_age=age,
-    path="/",
-)
+
+    response.set_cookie(
+        SESSION_COOKIE,
+        token,
+        httponly=True,
+        secure=COOKIE_SECURE,
+        samesite="none" if COOKIE_SECURE else "lax",
+        max_age=age,
+        path="/",
+    )
+
+    response.set_cookie(
+        CSRF_COOKIE,
+        csrf,
+        httponly=False,
+        secure=COOKIE_SECURE,
+        samesite="none" if COOKIE_SECURE else "lax",
+        max_age=age,
+        path="/",
+    )
 
 def clear_cookies(response: Response):
     response.delete_cookie(SESSION_COOKIE, path="/")

@@ -4,17 +4,15 @@ export const api = axios.create({
   baseURL: `${process.env.REACT_APP_BACKEND_URL?.replace(/\/+$/, "")}/api/v1`,
   withCredentials: true,
   timeout: 20000,
-  headers: {
-    "Content-Type": "application/json",
-  },
 });
 
+// Add the session-bound CSRF token to every non-safe request.
+// Use plain axios for the token request to avoid recursively
+// invoking this interceptor.
 api.interceptors.request.use(async (config) => {
   const method = (config.method || "get").toLowerCase();
 
   if (!["get", "head", "options"].includes(method)) {
-    // Use plain axios so fetching the CSRF token does not
-    // trigger this interceptor recursively.
     const response = await axios.get(
       `${api.defaults.baseURL}/auth/csrf`,
       {
@@ -34,10 +32,7 @@ api.interceptors.request.use(async (config) => {
     config.headers = config.headers || {};
 
     if (typeof config.headers.set === "function") {
-      config.headers.set(
-        "X-CSRF-Token",
-        csrfToken
-      );
+      config.headers.set("X-CSRF-Token", csrfToken);
     } else {
       config.headers["X-CSRF-Token"] = csrfToken;
     }
